@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Reminder App</title>
+        <style>
+            body{
+                font-family: "Arial", sans-serif;
+                background-color: #eeaaee;
+            }
+            .container{
+                max-width: 500px;
+                margin:auto;
+                background-color: #fff;
+                padding: 1px 20px 20px 20px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba( 0,0, 0, 0.1);
+            }
+            label, input, button{
+                margin: 10px 0;
+                box-sizing: border-box;
+            }
+            input{
+                width: 100%;
+                margin-top: 5px;
+            }
+            table{
+                width:100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+            th,td{
+                padding: 5px;
+                border: 1px solid #ddd ;
+                text-align: center;
+            }
+            th{
+                background-color: #4caf50;
+                color: white;
+            }   
+            button{
+                background-color: #4caf50;
+                color: white;
+                padding: 5px;
+                border: none;
+            } 
+            button:hover{
+                background-color:#45a049 ;
+            }        
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2 style="text-align:center">SFIT Reminder Website For Teachers</h2>
+
+            <label for="">Lecture:</label>
+            <input type="text" id="lecture"/>
+            <label for="">Description:</label>
+            <input type="text" id="description"/>
+            <label for="">Date:</label>
+            <input type="date" id="date"/>
+            <label for="">Time of Lecture:</label>
+            <input type="time" id="time of lecture"/>
+            <label for="">Time of Reminder:</label>
+            <input type="time" id="time of reminder"/>
+ 
+           <button style="width: 100%" onclick="scheduleReminder();">
+            Schedule Reminder
+           </button>
+           
+           <table border="1">
+            <thead>
+                <tr>
+                    <th>Lecture</th>
+                    <th>Description</th>
+                    <th>Date & Reminder Time</th>
+                    <th>Lecture time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reminderTableBody"></tbody>
+           </table>
+         </div>
+         
+         <audio scr="notification2.mp3" id="notificationSound"></audio>
+         
+         <script>
+            //Ask user to allow notification access
+         /* if("Notification" in window){
+            Notification.requestPermission().then(function(permission){
+                if(Notification.permission!=="granted"){
+                    alert("Please allow notification access!")
+                    location.reload();
+                }
+               }):
+             }
+          */  
+
+            var timeoutIds=[];
+
+            function scheduleReminder(){
+                var lecture= document.getElementById("lecture").value;
+                var description= document.getElementById("description").value;
+                var date= document.getElementById("date").value;
+                var timeoflecture= document.getElementById("time of lecture").value;
+                var timeofreminder= document.getElementById("time of reminder").value;  
+
+                var dateTimeString = date + " " + timeofreminder;
+                var scheduleTime = new Date(dateTimeString);
+                var currentTime=new Date();
+                var timeDifference= scheduleTime - currentTime;
+
+                if(timeDifference > 0){
+                    addReminder(lecture,description,timeoflecture,dateTimeString);
+
+                    var timeoutId = setTimeout(function(){
+                        document.getElementById("notificationSound").play();
+
+                         var notification= new Notification(lecture,{
+                            body: description,
+                            requireInteraction: true,
+                         })
+                    },timeDifference);
+                    timeoutIds.push(timeoutId);
+                }
+                else{
+                    alert("The scheduled time is in the past!");
+                }
+            }
+            function addReminder(lecture,description,timeoflecture,dateTimeString){
+                var tableBody = document.getElementById("reminderTableBody");
+
+                var row = tableBody.insertRow();
+
+                var lectureCell=row.insertCell(0);
+                var descriptionCell=row.insertCell(1);
+                var timeoflectureCell=row.insertCell(2);
+                var dateTimeCell=row.insertCell(3);
+                var actionCell=row.insertCell(4);
+
+                lectureCell.innerHTML=lecture;
+                descriptionCell.innerHTML=description;
+                timeoflectureCell.innerHTML=timeoflecture;
+                dateTimeCell.innerHTML=dateTimeString;
+                actionCell.innerHTML= '<button onclick = "deleteReminder(this);">Delete</button>';
+            }
+            function deleteReminder(button){
+              var row = button.closest("tr");
+              var index = row.rowIndex;
+
+              clearTimeout(timeoutIds[index - 1]);
+              timeoutIds.splice(index - 1, 1);
+
+              row.remove();
+            }
+         </script>
+    </body>
+</html>
